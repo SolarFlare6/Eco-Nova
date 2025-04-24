@@ -1,0 +1,2 @@
+D:/android app/eco_app/android/app/.cxx/RelWithDebInfo/5c2p356c/armeabi-v7a/CMakeFiles/edit_cache.dir
+D:/android app/eco_app/android/app/.cxx/RelWithDebInfo/5c2p356c/armeabi-v7a/CMakeFiles/rebuild_cache.dir
