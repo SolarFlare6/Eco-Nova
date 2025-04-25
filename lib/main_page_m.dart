@@ -50,6 +50,9 @@ int feed_size = 100;
 String app_ver = "Version: 1.10 Beta User login";
 String build_date = "Date: 24/04/2025";
 
+// some timer vars
+Timer? _newsCheckerTimer;
+
 // init notification stuff
 final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
 
@@ -57,6 +60,9 @@ final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin = FlutterL
 late Stream<StepCount> _stepCountStream;
 late Stream<PedestrianStatus> _pedestrianStatusStream;
 String _status = "Unknown";
+
+// list for article checking
+List<Map<String, dynamic>> _articles = [];
 
 // top ranks list
 List<Map<String, String>> topRanks = [
@@ -735,6 +741,35 @@ class _MainPageState extends State<MainPage> {
     print("added to steps history !!");
   }
 
+  // fn for newsfeed polling
+
+  // for loading the initial state of the _article list
+  void loadInitialArticles() async {
+    _articles = await fetchGoogleNews();
+    setState(() {});
+  }
+
+  // fn for checking if there is a new article to notify the user
+  void startNewsPolling() {
+    _newsCheckerTimer = Timer.periodic(Duration(minutes: 1), (_) async {
+      print("Article checker timer fired !!!!");
+      List<Map<String, dynamic>> latest = await fetchGoogleNews();
+
+      // Compare latest with current
+      if (notif_for_news) {
+        if (_articles.isNotEmpty && latest.isNotEmpty) {
+          if (_articles.first['title'] != latest.first['title']) {
+            // New article detected
+            showNotification('Eco Nova', 'A new article is available');
+            _articles = latest; // Update list
+            setState(() {});
+          }
+        }
+      }
+
+    });
+  }
+
   // List of pages (initialized in initState)
   late List<Widget> _pages;
 
@@ -753,13 +788,23 @@ class _MainPageState extends State<MainPage> {
     set_Steps_mark_and_goal();
 
     // feed ite
-    addFeedItem("stuff", "Green recycling shirt", 'assets/recycling_shirt.jpg', "https://www.youtube.com/");
+    addFeedItem("stuff", "Green recycling shirt", 'assets/recycling_shirt.jpg', "");
 
     // refresh newsfeed
     _refreshData();
 
+    // for article checking init state
+    loadInitialArticles();
+    startNewsPolling();
+
     // init notif
     initializeNotifications();
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    _newsCheckerTimer?.cancel(); // end the article checker timer
   }
 
   void _onItemTapped(int index) {
