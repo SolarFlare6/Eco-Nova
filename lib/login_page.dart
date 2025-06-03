@@ -3,6 +3,10 @@ import 'package:google_fonts/google_fonts.dart';
 import 'signup_page.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:restart_app/restart_app.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
+import 'dart:io';
+import 'package:fluttertoast/fluttertoast.dart';
 
 class LoginPage_view extends StatefulWidget {
   const LoginPage_view({Key? key}) : super(key: key);
@@ -21,9 +25,48 @@ class _LoginPage_viewState extends State<LoginPage_view> {
   String entered_username = '';
   String entered_pass = '';
 
-  // send data to server
-  void send_user_data_to_server() async {
+  // check internet connection fn
+  Future<bool> hasInternetAccess() async {
+    try {
+      final result = await InternetAddress.lookup('google.com');
+      return result.isNotEmpty && result[0].rawAddress.isNotEmpty;
+    } catch (e) {
+      return false;
+    }
+  }
 
+  // check login info
+  Future<bool> loginUser(String username, String password) async {
+    final url = Uri.parse('http://10.0.2.2:3000/login'); // Use IP if on real device
+
+    try {
+      final response = await http.post(
+        url,
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({
+          'user': username,
+          'password': password,
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        if (data['status'] == true && data['token'] != null) {
+          print('Login successful! Token: ${data['token']}');
+          // Save the token if needed
+          return true;
+        } else {
+          print('Login failed: Invalid credentials');
+          return false;
+        }
+      } else {
+        print('Login failed: ${response.statusCode}');
+        return false;
+      }
+    } catch (e) {
+      print('Login error: $e');
+      return false;
+    }
   }
 
   // save user data localy
@@ -36,12 +79,65 @@ class _LoginPage_viewState extends State<LoginPage_view> {
 
   // login fn
   void user_login() async {
-    if (entered_username != '' && entered_pass == '12345') {
-      print('Credentials are correct welcome !!!');
-      send_user_data_to_server();
+
+    if (entered_username.isNotEmpty && entered_pass.isNotEmpty) {
+
+      bool cred_true = await loginUser(entered_username, entered_pass);
+
+      if (cred_true) {
+        print('with creadentials_var Credentials are correct welcome !!!');
+        _saveUserDataLocaly();
+        show_toast_msg("Login succesful", ToastGravity.BOTTOM, Color.fromARGB(255, 227, 242, 223), Colors.black);
+        Restart.restartApp();
+      } else {
+        show_toast_msg("Login failed", ToastGravity.BOTTOM, Colors.black, Colors.white);
+      }
+
+    } else {
+      show_toast_msg_norm("Please enter credentials");
+    }
+
+    // for debug purposes
+    if (entered_username == 'Debug' && entered_pass == '12345') {
+      print('with debug info Credentials are correct welcome !!!');
+      //send_user_data_to_server();
       _saveUserDataLocaly();
       Restart.restartApp();
     }
+  }
+
+  // function to show toast message with extra parametars
+  void show_toast_msg(String msg, ToastGravity grav, Color bg_col, Color txt_col) {
+
+    print("called toast message function !!");
+
+    Fluttertoast.showToast(
+      msg: msg,
+      toastLength: Toast.LENGTH_SHORT,
+      gravity: grav, // or ToastGravity.TOP / CENTER
+      timeInSecForIosWeb: 1,
+      backgroundColor: bg_col,
+      textColor: txt_col, // Color.fromARGB(255, 241, 241, 241)
+      fontSize: 16.0,
+    );
+
+  }
+
+  // funtion to show toast message with just a string parametar
+  void show_toast_msg_norm(String msg) {
+
+    print("called toast message function !!");
+
+    Fluttertoast.showToast(
+      msg: msg,
+      toastLength: Toast.LENGTH_SHORT,
+      gravity: ToastGravity.BOTTOM, // or ToastGravity.TOP / CENTER
+      timeInSecForIosWeb: 1,
+      backgroundColor: Colors.black,
+      textColor: Color.fromARGB(255, 241, 241, 241), // Color.fromARGB(255, 241, 241, 241)
+      fontSize: 16.0,
+    );
+
   }
 
   @override

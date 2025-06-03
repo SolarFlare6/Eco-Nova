@@ -17,7 +17,6 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'steps_screen.dart';
 import 'package:intl/intl.dart';
 import 'rewards_page_view.dart';
-//import 'login_page.dart';
 
 // if the app isnt building try this : https://github.com/flutter/flutter/issues/156304#issuecomment-2397707812
 
@@ -717,6 +716,20 @@ class _MainPageState extends State<MainPage> {
     },
   ];
 
+  List<Map<String, dynamic>> ActionItems = [
+    {
+      'title': 'Cycling',
+      'icon': Icons.directions_bike,
+      'points': '+20',
+    },
+    {
+      'title': 'Recycling',
+      'icon': Icons.recycling,
+      'points': '+1',
+    },
+    // Add more actions here...
+  ];
+
   void addFeedItem(String feedname,String title, String imagePath, String lnk) {
     setState(() {
       if (feedname == "newsfeed") newsFeedData.add({"title": title, "image": imagePath, "link": lnk});
@@ -754,6 +767,7 @@ class _MainPageState extends State<MainPage> {
     _newsCheckerTimer = Timer.periodic(Duration(minutes: 1), (_) async {
       print("Article checker timer fired !!!!");
       List<Map<String, dynamic>> latest = await fetchGoogleNews();
+      print("User preference for showing notification on new articles is : " + notif_for_news.toString());
 
       // Compare latest with current
       if (notif_for_news) {
@@ -842,6 +856,14 @@ class _MainPageState extends State<MainPage> {
       print("Newsfeed data after fetchNewsfeed fn is : ");
       print(newsFeedData);
 
+      // code to fetch events newsfeed when refersh
+      var events = await fetchEventsFeedData();
+      print("contents of the events newsfeed : \n" + events.toString());
+
+      // code to fetch the actions when refersh
+      var actions_temp = await fetchEcoActions();
+      print("contents of the actions list : \n" + actions_temp.toString());
+
       // code for new news notifiction
       // if (newsFeedData != temp && notif_for_news) {
       //   print("new news available!!!");
@@ -851,6 +873,8 @@ class _MainPageState extends State<MainPage> {
       // update the page and rebuild the For You page
       setState(() {
         newsFeedData = temp;
+        if (events.isNotEmpty) eventsFeedData = events;
+        if (actions_temp.isNotEmpty) ActionItems = actions_temp;
       });
 
     } else {
@@ -871,6 +895,75 @@ class _MainPageState extends State<MainPage> {
     _saveAllData();
   }
 
+  // for getting events newsfeed from backend
+  Future<List<Map<String, dynamic>>> fetchEventsFeedData() async {
+    final response = await http.get(Uri.parse('http://10.0.2.2:3000/events'));
+
+    if (response.statusCode == 200) {
+      List<dynamic> events = json.decode(response.body);
+
+      // Mapping each event to the desired format
+      List<Map<String, dynamic>> eventsFeedData = events.map<Map<String, dynamic>>((event) {
+        return {
+          "title": event["title"] ?? "No Title",
+          "image": getImageForTitle(event["title"]),
+          "link": event["eventLink"] ?? "",
+        };
+      }).toList();
+
+      return eventsFeedData;
+    } else {
+      throw Exception('Failed to load events');
+    }
+  }
+
+  // Optional: Match a title to a local image
+  String getImageForTitle(String? title) {
+    if (title == null) return "assets/default.jpg";
+    if (title.contains("Climathon")) return "assets/image 1.png";
+    if (title.contains("bird")) return "assets/image 2.png";
+    if (title.contains("tree")) return "assets/planting-tree.jpg";
+    return "assets/default.jpg"; // fallback image
+  }
+
+  // function to grab actions from node.js server
+  Future<List<Map<String, dynamic>>> fetchEcoActions() async {
+    final response = await http.get(Uri.parse('http://10.0.2.2:3000/actions'));
+
+    if (response.statusCode == 200) {
+      List<dynamic> data = json.decode(response.body);
+
+      // Convert API data to List<Map<String, dynamic>>
+      List<Map<String, dynamic>> actionItems = data.map<Map<String, dynamic>>((item) {
+        String title = item['title'] ?? 'Unknown';
+        int points = item['points'] ?? 0;
+
+        return {
+          'title': title,
+          'icon': getIconForAction(title),
+          'points': '+$points',
+        };
+      }).toList();
+
+      return actionItems;
+    } else {
+      throw Exception('Failed to fetch eco actions');
+    }
+  }
+
+  /// Matches action titles to specific icons
+  IconData getIconForAction(String title) {
+    title = title.toLowerCase();
+
+    if (title.contains('cycling')) return Icons.directions_bike;
+    if (title.contains('recycling')) return Icons.recycling;
+    if (title.contains('walking')) return Icons.directions_walk;
+    if (title.contains('tree')) return Icons.park;
+    if (title.contains('bus')) return Icons.directions_bus;
+    // Default icon
+    return Icons.eco;
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -886,6 +979,7 @@ class _MainPageState extends State<MainPage> {
       ActionsPage(
         openRewards: open_rewards_page,
         openAcc_page: open_quick_acc,
+        actionItems: ActionItems,
       ),
       For_U_Page(
         openRewards: open_rewards_page,
@@ -1121,8 +1215,9 @@ class HomePage extends StatelessWidget {
 class ActionsPage extends StatelessWidget {
   final VoidCallback openRewards; // Callback function
   final VoidCallback openAcc_page;
+  final List<Map<String, dynamic>> actionItems;
 
-  const ActionsPage({Key? key, required this.openRewards, required this.openAcc_page}) : super(key: key);
+  const ActionsPage({Key? key, required this.openRewards, required this.openAcc_page, required this.actionItems}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -1380,63 +1475,47 @@ class ActionsPage extends StatelessWidget {
             height: 20,
           ),
 
+          // Steps layout
+          action_element_with_expanded_info(
+            title_label: 'Steps',
+            widget_width: 350,
+            progress: steps_progress,
+            widget_icon: Icons.directions_walk_rounded,
+            added_points: '+10',
+            val: steps_taken,
+            val_goal: steps_goal,
+            tap_fn: () {
+              print('tapped steps layout !!!');
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => StepsPage(imp_steps: steps_taken, imp_steps_goal: steps_goal, stepHistory: stepHistory,)),
+              );
+            },
+          ),
+
+          // SizedBox(
+          //   height: 10,
+          // ),
+
           // List of actions
           Expanded(
             child: Container(
               width: 350,
               //   height: 250,
               child: ListView(
-                children: <Widget>[
-
-                  // Steps layout
-                  action_element_with_expanded_info(
-                    title_label: 'Steps',
-                    widget_width: 330,
-                    progress: steps_progress,
-                    widget_icon: Icons.directions_walk_rounded,
-                    added_points: '+10',
-                    val: steps_taken,
-                    val_goal: steps_goal,
-                    tap_fn: () {
-                      print('tapped steps layout !!!');
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (context) => StepsPage(imp_steps: steps_taken, imp_steps_goal: steps_goal, stepHistory: stepHistory,)),
-                      );
-                    },
-                  ),
-
-                  SizedBox(
-                    height: 10,
-                  ),
-
-                  // Cycling layout
-                  action_element_with_progress(
-                    title_label: 'Cycling',
-                    widget_width: 330,
-                    progress: 0.1,
-                    widget_icon: Icons.directions_bike,
-                    added_points: "+20",
-                  ),
-
-                  SizedBox(
-                    height: 10,
-                  ),
-
-                  // Recycle layout
-                  action_element(
-                    title_label: 'Recycling',
-                    widget_width: 330,
-                    widget_icon: Icons.recycling,
-                    added_points: "+1",
-                  ),
-
-                  SizedBox(
-                    height: 10,
-                  ),
-
-
-                ],
+                children: actionItems
+                    .map((item) => Column(
+                  children: [
+                    action_element(
+                      title_label: item['title'],
+                      widget_width: 330,
+                      widget_icon: item['icon'],
+                      added_points: item['points'],
+                    ),
+                    const SizedBox(height: 10),
+                  ],
+                ))
+                    .toList(),
               ),
             ),
           ),
