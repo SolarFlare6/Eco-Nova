@@ -13,7 +13,7 @@ const userSchema=new Schema({
         type:String,
         required:true
     },
-    claimedRewards: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Reward' }],
+    claimedRewards: [{ type: mongoose.Schema.Types.ObjectId, ref: 'rewardsModel' }],
     actionsCompleted:[{
         actionID:{type:mongoose.Schema.Types.ObjectId,ref:'actionModel'},
         timestamp:{type:Date,default:Date.now}}],
