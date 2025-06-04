@@ -856,13 +856,7 @@ class _MainPageState extends State<MainPage> {
       print("Newsfeed data after fetchNewsfeed fn is : ");
       print(newsFeedData);
 
-      // code to fetch events newsfeed when refersh
-      var events = await fetchEventsFeedData();
-      print("contents of the events newsfeed : \n" + events.toString());
-
-      // code to fetch the actions when refersh
-      var actions_temp = await fetchEcoActions();
-      print("contents of the actions list : \n" + actions_temp.toString());
+      get_newsfeed_info_from_backend();
 
       // code for new news notifiction
       // if (newsFeedData != temp && notif_for_news) {
@@ -873,8 +867,6 @@ class _MainPageState extends State<MainPage> {
       // update the page and rebuild the For You page
       setState(() {
         newsFeedData = temp;
-        if (events.isNotEmpty) eventsFeedData = events;
-        if (actions_temp.isNotEmpty) ActionItems = actions_temp;
       });
 
     } else {
@@ -893,6 +885,30 @@ class _MainPageState extends State<MainPage> {
 
     // save all the apps data
     _saveAllData();
+  }
+
+  void get_newsfeed_info_from_backend() async {
+    try {
+      var events;
+      var actions_temp;
+
+      if (username != "Debug") {
+        // code to fetch events newsfeed when refersh
+        var events = await fetchEventsFeedData();
+        print("contents of the events newsfeed : \n" + events.toString());
+
+        // code to fetch the actions when refersh
+        var actions_temp = await fetchEcoActions();
+        print("contents of the actions list : \n" + actions_temp.toString());
+      }
+
+      setState(() {
+        if (events.isNotEmpty && username != "Debug") eventsFeedData = events;
+        if (actions_temp.isNotEmpty && username != "Debug") ActionItems = actions_temp;
+      });
+    } catch (e) {
+      print("Error caught is : $e");
+    }
   }
 
   // for getting events newsfeed from backend

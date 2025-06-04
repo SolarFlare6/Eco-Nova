@@ -5,6 +5,7 @@ import 'dart:io';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:fluttertoast/fluttertoast.dart';
+import 'quick_fn.dart';
 
 
 class SignupPage_view extends StatefulWidget {
@@ -120,40 +121,6 @@ class _SignupPage_viewState extends State<SignupPage_view> {
     }
   }
 
-  void show_toast_msg(String msg, ToastGravity grav, Color bg_col, Color txt_col) {
-
-    print("called toast message function !!");
-
-    Fluttertoast.showToast(
-      msg: msg,
-      toastLength: Toast.LENGTH_SHORT,
-      gravity: grav, // or ToastGravity.TOP / CENTER
-      timeInSecForIosWeb: 1,
-      backgroundColor: bg_col,
-      textColor: txt_col, // Color.fromARGB(255, 241, 241, 241)
-      fontSize: 16.0,
-    );
-
-  }
-
-  void show_toast_msg_norm(String msg) {
-
-    print("called toast message function !!");
-
-    Fluttertoast.showToast(
-      msg: msg,
-      toastLength: Toast.LENGTH_SHORT,
-      gravity: ToastGravity.BOTTOM, // or ToastGravity.TOP / CENTER
-      timeInSecForIosWeb: 1,
-      backgroundColor: Colors.black,
-      textColor: Color.fromARGB(255, 241, 241, 241), // Color.fromARGB(255, 241, 241, 241)
-      fontSize: 16.0,
-    );
-
-  }
-
-
-
 
   @override
   Widget build(BuildContext context) {
@@ -261,23 +228,31 @@ class _SignupPage_viewState extends State<SignupPage_view> {
 
                     print("Entered credentials for register are :\n" + "usrname : "+ usern + "\npass : "+ pass);
 
-                    if (await loginUser(usern, pass)) {
-                      print("Login credentials already exist !!");
-                      show_toast_msg_norm("Account already exists");
-                    } else {
+                    try {
+                      bool login_cred_check = await loginUser(usern, pass);
 
-                      // if the credentials arent duplicate register the user
-                      bool registered = await registerUser(usern, pass);
-
-                      if (registered) {
-                        print("Registration succesfull.");
-                        show_toast_msg("Registration successful", ToastGravity.BOTTOM, Color.fromARGB(255, 227, 242, 223), Colors.black);
-                        Navigator.pop(context);
+                      if (login_cred_check) {
+                        print("Login credentials already exist !!");
+                        show_toast_msg_norm("Account already exists");
                       } else {
-                        print("Registration failed !!!");
-                        show_toast_msg("Registration failed", ToastGravity.BOTTOM, Colors.redAccent, Colors.black);
+
+                        // if the credentials arent duplicate register the user
+                        bool registered = await registerUser(usern, pass);
+
+                        if (registered) {
+                          print("Registration succesfull.");
+                          show_toast_msg("Registration successful", ToastGravity.CENTER, Color.fromARGB(255, 227, 242, 223), Colors.black);
+                          Navigator.pop(context);
+                        } else {
+                          print("Registration failed !!!");
+                          show_toast_msg("Registration failed", ToastGravity.CENTER, Colors.redAccent, Colors.black);
+                        }
+
                       }
+                    } catch (e) {
+                      print("Error with register : $e");
                     }
+
                   } else {
                     print("Enter valid credentials !!!!");
                     show_toast_msg_norm("Enter valid credentials");

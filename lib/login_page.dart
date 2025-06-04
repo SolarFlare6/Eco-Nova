@@ -1,3 +1,4 @@
+import 'package:Earth_nova/main_page_m.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'signup_page.dart';
@@ -7,6 +8,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'dart:io';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'quick_fn.dart';
 
 class LoginPage_view extends StatefulWidget {
   const LoginPage_view({Key? key}) : super(key: key);
@@ -80,64 +82,30 @@ class _LoginPage_viewState extends State<LoginPage_view> {
   // login fn
   void user_login() async {
 
-    if (entered_username.isNotEmpty && entered_pass.isNotEmpty) {
+    if (entered_username.isNotEmpty && entered_pass.isNotEmpty && entered_username != "Debug") {
 
       bool cred_true = await loginUser(entered_username, entered_pass);
 
       if (cred_true) {
         print('with creadentials_var Credentials are correct welcome !!!');
         _saveUserDataLocaly();
-        show_toast_msg("Login succesful", ToastGravity.BOTTOM, Color.fromARGB(255, 227, 242, 223), Colors.black);
+        show_toast_msg("Login succesful", ToastGravity.CENTER, Color.fromARGB(255, 227, 242, 223), Colors.black);
         Restart.restartApp();
       } else {
-        show_toast_msg("Login failed", ToastGravity.BOTTOM, Colors.black, Colors.white);
+        show_toast_msg("Login failed", ToastGravity.CENTER, Colors.black, Colors.white);
       }
 
     } else {
-      show_toast_msg_norm("Please enter credentials");
+      if (entered_username != "Debug") show_toast_msg_norm("Please enter credentials");
     }
 
     // for debug purposes
     if (entered_username == 'Debug' && entered_pass == '12345') {
       print('with debug info Credentials are correct welcome !!!');
-      //send_user_data_to_server();
       _saveUserDataLocaly();
+      show_toast_msg_norm("Logged in with debug credentials");
       Restart.restartApp();
     }
-  }
-
-  // function to show toast message with extra parametars
-  void show_toast_msg(String msg, ToastGravity grav, Color bg_col, Color txt_col) {
-
-    print("called toast message function !!");
-
-    Fluttertoast.showToast(
-      msg: msg,
-      toastLength: Toast.LENGTH_SHORT,
-      gravity: grav, // or ToastGravity.TOP / CENTER
-      timeInSecForIosWeb: 1,
-      backgroundColor: bg_col,
-      textColor: txt_col, // Color.fromARGB(255, 241, 241, 241)
-      fontSize: 16.0,
-    );
-
-  }
-
-  // funtion to show toast message with just a string parametar
-  void show_toast_msg_norm(String msg) {
-
-    print("called toast message function !!");
-
-    Fluttertoast.showToast(
-      msg: msg,
-      toastLength: Toast.LENGTH_SHORT,
-      gravity: ToastGravity.BOTTOM, // or ToastGravity.TOP / CENTER
-      timeInSecForIosWeb: 1,
-      backgroundColor: Colors.black,
-      textColor: Color.fromARGB(255, 241, 241, 241), // Color.fromARGB(255, 241, 241, 241)
-      fontSize: 16.0,
-    );
-
   }
 
   @override
