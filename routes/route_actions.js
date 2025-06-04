@@ -1,5 +1,5 @@
 //Action routes
-const{postEcoAction,getEcoAction,getEcoTopContributors, todaysAchievements, getAchievment}=require('../controllers/controller_actions');
+const{postEcoAction,getEcoAction,getEcoTopContributors, todaysAchievements, getAchievement}=require('../controllers/controller_actions');
 const router=require('express').Router();
 router.post('/create-action',postEcoAction)
 router.get('/actions',getEcoAction);
