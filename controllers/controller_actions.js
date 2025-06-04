@@ -1,5 +1,4 @@
-const res = require('express/lib/response');
-const{getAction,postAction,getTopContributors,getTodaysAchievements}=require('../services/service_actions');
+const{getAction,postAction,getTopContributors}=require('../services/service_actions');
 //Post eco action
 const postEcoAction=async(req,res) =>{
  const{actionName,userID}=req.body;
@@ -32,13 +31,4 @@ const getEcoTopContributors=async(req,res) =>{
   throw error;
  }    
 };
-//Get today's achievements
-const todaysAchievements=async(req,res)=>{
-  try{
-    const tAchievement=await getTodaysAchievements();
-    res.status(200).json(tAchievement);
-  }catch(error) {
-    res.status(500).json({message:'Cannot load achievement',error})
-    throw error;}
-}
-module.exports={postEcoAction,getEcoAction,getEcoTopContributors,todaysAchievements};
+module.exports={postEcoAction,getEcoAction,getEcoTopContributors};

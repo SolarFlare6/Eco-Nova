@@ -8,7 +8,7 @@ try{
     message: 'Event created',
     event: newEvent});
 }catch(error){
-   res.status(500).json({message:'Error posting event',error});}
+   res.status(500).json({message:'Error posting event!',error});}
 }
 //Get event
 const getEvent=async(req,res)=>{
@@ -17,6 +17,6 @@ try{
     const fetchedEvent=await eventService.fetchEvents(url ? [url] : []);
     res.status(200).json(fetchedEvent);
 }catch(error){
- res.status(500).json({message:'Error getting event',error});   }
+ res.status(500).json({message:'Error getting event!',error});   }
 }
 module.exports={postEvent,getEvent};
