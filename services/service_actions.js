@@ -84,4 +84,27 @@ const getTodaysAchievements=async(limit=10)=>{
    console.error('Error getting todays achievements',error);
    throw error;}
 }
+//Send achievement to the app
+const addAchievement=async({ userId, actionId })=>{
+  try{
+  const timestamp = new Date();
+    const result = await userModel.updateOne(
+      { _id: userId },
+      {
+        $push: {
+          actionsCompleted:{
+            action: actionId,
+            timestamp: timestamp
+          }
+        }
+      }
+    );
+    if (result.modifiedCount === 0) {
+      throw new Error('No user was updated. Check userId and try again');
+    }
+  return { success: true, message: "Achievement added" };
+  }catch(error) {
+   console.error('Error sending achievement',error);
+   throw error; }
+}
 module.exports = {postAction,getAction,getTopContributors,getTodaysAchievements};
