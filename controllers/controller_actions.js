@@ -41,4 +41,13 @@ const todaysAchievements=async(req,res)=>{
     res.status(500).json({message:'Cannot load achievement',error})
     throw error;}
 }
+//Get achievement
+const getAchievement=async(req,res)=>{
+  try{
+  const achievement=await addAchievement();
+  res.status(200).json(achievement);
+  }catch(error){
+    res.status(500).json({message:'Cannot get achievement'},error);
+    throw error;}
+}
 module.exports={postEcoAction,getEcoAction,getEcoTopContributors,todaysAchievements};
