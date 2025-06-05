@@ -8,15 +8,17 @@ static async createEvent(eventData){
     }catch(error) {
         console.log('Error creating event');
         throw error;}}
-//Fetch events
-static async fetchEvents(){
+//Fetch events-if url specified return specified,else return all,if empty return none
+static async fetchEvents(urls = []){
   try{
-      //Fetch events from dbase
-      const backendEvents = await Event.find();
-      const showEvents = [...backendEvents];
-      return showEvents; 
-    }catch(error) {
-     console.log('Error fetching events info');
-     throw error;}}
+    let backendEvents;
+    if (urls.length > 0) {
+      backendEvents = await Event.find({ url: { $in: urls } }); 
+    }else{
+      backendEvents = await Event.find();}
+    return [...backendEvents];
+  }catch(error) {
+    console.log('Error fetching events info');
+    throw error;}}
 }
 module.exports=EventService;
