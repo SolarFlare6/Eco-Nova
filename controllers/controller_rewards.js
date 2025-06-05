@@ -18,3 +18,13 @@ try {
     res.status(500).json({message:'Error creating reward'},error);  
     throw error;}
 }
+//Get rewards
+exports.getRewards=async(req,res)=>{
+    const{url}=req.query;
+    try{
+    const fetchedRewards=await rewardsService.getRewards(url ? [url] : []);
+    res.status(200).json(fetchedRewards);
+    }catch(error) {
+     res.status(400).json({message:'Error getting reward'},error);
+     throw error;}
+}
