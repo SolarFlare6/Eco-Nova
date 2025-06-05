@@ -31,9 +31,9 @@ exports.loginUser=async(req,res)=>{
 //Get user rank
 exports.getUserRank =async(req,res) =>{
   try{
-    if(!req.user || !req.user.ID){
+    if(!req.user || !req.user._id){
       return res.status(401).json({ message: 'Unauthorized: User not found' });}
-    const userRank = await userService.checkUserRank(req.user.ID);
+    const userRank = await userService.checkUserRank(req.user._id);
     res.status(200).json({ rank: userRank });
   }catch (error) {
     res.status(400).json({ message: 'Bad request or invalid id', error });}
