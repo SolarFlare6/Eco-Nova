@@ -21,50 +21,8 @@ class _ExampleApplicationState extends State<ExampleApplication> {
   late Future<bool> _isLoggedInFuture;
   String username = '';
   String pass = '';
+  String token = '';
 
-  // check internet connection fn
-  Future<bool> hasInternetAccess() async {
-    try {
-      final result = await InternetAddress.lookup('google.com');
-      return result.isNotEmpty && result[0].rawAddress.isNotEmpty;
-    } catch (e) {
-      return false;
-    }
-  }
-
-  // check login info
-  Future<bool> loginUser(String username, String password) async {
-    final url = Uri.parse('http://10.0.2.2:3000/login'); // Use IP if on real device
-
-    try {
-      final response = await http.post(
-        url,
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({
-          'user': username,
-          'password': password,
-        }),
-      );
-
-      if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
-        if (data['status'] == true && data['token'] != null) {
-          print('Login successful! Token: ${data['token']}');
-          // Save the token if needed
-          return true;
-        } else {
-          print('Login failed: Invalid credentials');
-          return false;
-        }
-      } else {
-        print('Login failed: ${response.statusCode}');
-        return false;
-      }
-    } catch (e) {
-      print('Login error: $e');
-      return false;
-    }
-  }
 
   // check userCredentials fn
   Future<bool> checkUserCredentials() async {
@@ -72,10 +30,14 @@ class _ExampleApplicationState extends State<ExampleApplication> {
 
     username = prefs.getString('username') ?? '';
     pass = prefs.getString('passw') ?? '';
+    token = prefs.getString('token') ?? '';
 
     print("User loaded: $username");
 
-    return username.isNotEmpty && pass.isNotEmpty;
+    if (username == "Debug") return username.isNotEmpty && pass.isNotEmpty;
+    else  {
+      return username.isNotEmpty && pass.isNotEmpty && token.isNotEmpty;
+    }
   }
 
   @override
@@ -101,7 +63,7 @@ class _ExampleApplicationState extends State<ExampleApplication> {
 
         // Navigate based on login check
         if (snapshot.data == true) {
-          return MaterialApp(home: MainPage(usrName: username));
+          return MaterialApp(home: MainPage(usrName: username, token: token,));
         } else {
           return MaterialApp(home: LoginPage_view());
         }

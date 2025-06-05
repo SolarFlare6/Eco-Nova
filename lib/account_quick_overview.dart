@@ -3,16 +3,19 @@ import 'custom_widgets.dart';
 import 'dart:async';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:restart_app/restart_app.dart';
+import 'quick_fn.dart';
 
 class Account_page_overview extends StatefulWidget {
   final String usern;
   final int pts;
+  final String rank;
   final List<Map<String, String>> topRanks;
 
 
   const Account_page_overview({Key? key,
     required this.usern,
     required this.pts,
+    required this.rank,
     required this.topRanks
   }) : super(key: key);
 
@@ -30,6 +33,7 @@ class Account_page_overviewState extends State<Account_page_overview> {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove('username');
     await prefs.remove('passw');
+    await prefs.remove('token');
   }
 
   void clearAllUserData() async {
@@ -101,7 +105,7 @@ class Account_page_overviewState extends State<Account_page_overview> {
                 SizedBox(width: 16),
                 overview_element_normal_ex(
                   title_label: "Rank",
-                  val: "55th",
+                  val: widget.rank+"th",
                   bg_color: Color.fromARGB(255, 227, 242, 223),
                   border_color: Color.fromARGB(255, 227, 242, 223),
                   widget_img: AssetImage('assets/rank_icon.png'),
@@ -149,6 +153,7 @@ class Account_page_overviewState extends State<Account_page_overview> {
                 // logout logic
                 clearUserLoginData();
                 clearAllUserData();
+                show_toast_msg_norm("Logged out successfully");
                 restartApp();
               },
               child: Container(

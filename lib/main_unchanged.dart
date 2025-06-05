@@ -37,7 +37,7 @@ class ExampleApplication extends StatelessWidget {
   Widget build(BuildContext context) {
     _loadUserData();
     if (username != '' && pass != '') {
-      return MaterialApp(home: MainPage(usrName: username,));
+      return MaterialApp(home: MainPage(usrName: username, token: '',));
     } else {
       return MaterialApp(home: LoginPage_view());
     }

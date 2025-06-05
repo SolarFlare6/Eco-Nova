@@ -1,4 +1,5 @@
 import 'package:Earth_nova/main_page_m.dart';
+import 'package:Earth_nova/quick_fn.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -128,7 +129,7 @@ class RewardItem extends StatelessWidget {
                     SizedBox(width: 10),
 
                     Text(
-                      item_name,
+                      insertNewlineAfterIndex(item_name, 17),
                       style: GoogleFonts.gabarito(
                         fontSize: 20,
                         fontWeight: FontWeight.bold,
@@ -878,54 +879,59 @@ class action_element extends StatelessWidget {
   }) : super(key: key);
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: widget_width,
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.black, width: 3),
-      ),
-      child: Row(
-        children: [
-          // Icon with background
-          Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: Colors.green[100], // Light green background
-              shape: BoxShape.circle,
+    return GestureDetector(
+      onTap: () {
+        print("action element tapped !!");
+      },
+      child: Container(
+        width: widget_width,
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: Colors.black, width: 3),
+        ),
+        child: Row(
+          children: [
+            // Icon with background
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: Colors.green[100], // Light green background
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                widget_icon, // Change this to match your exact icon
+                color: Colors.black,
+              ),
             ),
-            child: Icon(
-              widget_icon, // Change this to match your exact icon
-              color: Colors.black,
+            const SizedBox(width: 8),
+
+            // Label
+            Text(
+              title_label,
+              style: GoogleFonts.gabarito(
+                fontSize: 16,
+                fontWeight: FontWeight.w500,
+              ),
             ),
-          ),
-          const SizedBox(width: 8),
+            const SizedBox(width: 12),
 
-          // Label
-          Text(
-            title_label,
-            style: GoogleFonts.gabarito(
-              fontSize: 16,
-              fontWeight: FontWeight.w500,
+            Spacer(),
+
+            const SizedBox(width: 12),
+
+            // Step count increase
+            Text(
+              added_points,
+              style: GoogleFonts.gabarito(
+                fontSize: 16,
+                fontWeight: FontWeight.w500,
+                color: Colors.greenAccent,
+              ),
             ),
-          ),
-          const SizedBox(width: 12),
-
-          Spacer(),
-
-          const SizedBox(width: 12),
-
-          // Step count increase
-          Text(
-            added_points,
-            style: GoogleFonts.gabarito(
-              fontSize: 16,
-              fontWeight: FontWeight.w500,
-              color: Colors.greenAccent,
-            ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

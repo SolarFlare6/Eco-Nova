@@ -161,7 +161,7 @@ class _RewardsPage_viewState extends State<RewardsPage_view> {
                       points: widget.rewards[index]["points"]!,
                       gradient_col: widget.rewards[index]["grad_col"]!,
                       txt_col: widget.rewards[index]["txt_col"]!,
-                      item_name: 'item name',
+                      item_name: widget.rewards[index]["name"],
                     );
                   },
                 ),

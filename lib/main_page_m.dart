@@ -24,10 +24,12 @@ class MainPage extends StatefulWidget {
 
   // vars for the page to be loaded
   final String usrName;
+  final String token;
 
 
   const MainPage({Key? key,
     required this.usrName,
+    required this.token,
   }) : super(key: key);
 
   @override
@@ -36,6 +38,7 @@ class MainPage extends StatefulWidget {
 
 // vars
 String username = "Username";
+String user_token = "";
 int points = 0;
 int actions_complete = 0;
 int steps_taken = 0;
@@ -46,8 +49,17 @@ bool notif_for_event = true;
 bool notif_for_news = false;
 bool open_in_browser = true;
 int feed_size = 100;
-String app_ver = "Version: 1.10 Beta User login";
-String build_date = "Date: 24/04/2025";
+String app_ver = "Version: 1.11";
+String build_date = "Date: 04/06/2025";
+
+// air quality vars
+String city = "Unknown";
+String pollutant = "Unknown";
+String pm25 = "Unknown";
+String pm10 = "Unknown";
+String no2 = "Unknown";
+String o3 = "Unknown";
+String last_update = "Unknown";
 
 // some timer vars
 Timer? _newsCheckerTimer;
@@ -63,12 +75,13 @@ String _status = "Unknown";
 // list for article checking
 List<Map<String, dynamic>> _articles = [];
 
-// top ranks list
+// top ranks list && rank variable
 List<Map<String, String>> topRanks = [
   {"name": "Jane Doe", "position": "1st"},
   {"name": "Kevin Doe", "position": "2nd"},
   {"name": "Sam Stevenson", "position": "3rd"},
 ];
+String user_rank = '55';
 
 // rewards list
 List<Map<String, dynamic>> rewards_list = [
@@ -130,6 +143,111 @@ class _MainPageState extends State<MainPage> {
   // }
 
   // this will be for custom overlay screen code
+
+  // Function to Show the Popup menu for air quality
+  void showPopupMenu_air_quality(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) {
+        return Center(
+          child: Container(
+            margin: EdgeInsets.all(20),
+            padding: EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: Color.fromARGB(255, 241, 241, 241), // Light green background
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+
+                // title for overlay menu
+                Row(
+                  children: [
+
+                    SizedBox(width: 10,),
+
+                    Image(
+                      image: AssetImage('assets/air_quality_icon.png'),
+                      width: 32,
+                      height: 32,
+                    ),
+
+                    SizedBox(width: 10),
+
+                    Text(
+                      'Air quality',
+                      style: GoogleFonts.gabarito(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+
+                  ],
+                ),
+
+                SizedBox(height: 25),
+
+                // statistics
+                Container(
+                  width: 330,
+                  height: 200,
+                  //color: Colors.blue,
+                  child: ListView(
+                    children: <Widget>[
+                      buildItem_with_info("City :", city),
+                      buildItem_with_info("Pollutant :", pollutant),
+                      buildItem_with_info("PM25 :", pm25),
+                      buildItem_with_info("PM10 :", pm10),
+                      buildItem_with_info("NO2 :", no2),
+                      buildItem_with_info("O3 :", o3),
+                      buildItem_with_info("Last update :", last_update)
+                      //buildProgressItem("Cycling", "1km/10km", 0.1, "+20"),
+                    ],
+                  ),
+                ),
+
+
+                SizedBox(height: 25),
+
+
+                SizedBox(
+                  height: 10,
+                ),
+
+                // close btn
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.black,
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                  ),
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                  child: Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 30, vertical: 10),
+                    child: Text(
+                      "Close",
+                      style: GoogleFonts.gabarito(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ),
+
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
 
   // Function to Show the Actions Overview Overlay
   void showActionsOverview(BuildContext context) {
@@ -242,7 +360,7 @@ class _MainPageState extends State<MainPage> {
     );
   }
 
-// Progress Item Widget
+  // Progress Item Widget
   Widget buildProgressItem(String title, String progress, double value, String points) {
     return Container(
       margin: EdgeInsets.only(bottom: 15),
@@ -296,6 +414,44 @@ class _MainPageState extends State<MainPage> {
                     fontWeight: FontWeight.bold,
                     color: Colors.lightGreen,
                   ),
+              ),
+
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  // Item Widget
+  Widget buildItem_with_info(String title, String val,) {
+    return Container(
+      margin: EdgeInsets.only(bottom: 15),
+      padding: EdgeInsets.all(10),
+      decoration: BoxDecoration(
+        border: Border.all(color: Colors.black, width: 2.5),
+        borderRadius: BorderRadius.circular(15),
+        color: Colors.white,
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            title,
+            style: GoogleFonts.gabarito(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                val,
+                style: GoogleFonts.gabarito(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
 
             ],
@@ -433,7 +589,7 @@ class _MainPageState extends State<MainPage> {
   void open_quick_acc() async {
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => Account_page_overview(usern: username,pts: points, topRanks: topRanks,)),
+      MaterialPageRoute(builder: (context) => Account_page_overview(usern: username,pts: points, rank: user_rank, topRanks: topRanks)),
     );
   }
 
@@ -685,16 +841,16 @@ class _MainPageState extends State<MainPage> {
     {
       "title": "Stefan made 5000\nsteps",
       "image": "assets/image 4.png",
-      "usen_id" : "Mr.Robot",
-      "post_title" : "Test title",
-      "post_content" : "Hello World what a nice day!!",
+      "usen_id" : "Stefan",
+      "post_title" : "5000 steps",
+      "post_content" : "Stefan made 5000 steps today. He did a great job staying active.",
     },
     {
       "title": "Filip recycled 1000\nbottles",
       "image": "assets/image 3.png",
-      "usen_id" : "Mr.Robot",
-      "post_title" : "Test title",
-      "post_content" : "Hello World what a nice day!!",
+      "usen_id" : "Filip",
+      "post_title" : "Recycled 1000 bottles",
+      "post_content" : "Filip did a great job being ecologically aware and recycled 1000 bottles.",
     },
   ];
 
@@ -796,6 +952,7 @@ class _MainPageState extends State<MainPage> {
 
     // init user
     username = widget.usrName;
+    user_token = widget.token;
 
     // // load data & set the goals for the steps
     _loadData();
@@ -857,6 +1014,9 @@ class _MainPageState extends State<MainPage> {
       print(newsFeedData);
 
       get_newsfeed_info_from_backend();
+      get_user_rank_and_top_ranks();
+      get_air_quality_node_js();
+      get_reawrds_node();
 
       // code for new news notifiction
       // if (newsFeedData != temp && notif_for_news) {
@@ -887,27 +1047,251 @@ class _MainPageState extends State<MainPage> {
     _saveAllData();
   }
 
-  void get_newsfeed_info_from_backend() async {
+  // function to get the rewards from node
+  void get_reawrds_node() async {
+    if (username != "Debug") {
+      print("Called get rewards function");
+
+      var rewards_list_temp = await fetchRewardsList();
+      print("Contens of rewards list temp are : " + rewards_list_temp.toString());
+
+      if (rewards_list_temp.isNotEmpty) rewards_list = rewards_list_temp;
+    }
+
+  }
+
+  // fetch the rewards from the DB
+  Future<List<Map<String, dynamic>>> fetchRewardsList() async {
+    final url = Uri.parse('http://10.0.2.2:3000/rewards'); // Replace with your actual URL
+
     try {
-      var events;
-      var actions_temp;
+      final response = await http.get(url);
 
-      if (username != "Debug") {
-        // code to fetch events newsfeed when refersh
-        var events = await fetchEventsFeedData();
-        print("contents of the events newsfeed : \n" + events.toString());
+      if (response.statusCode == 200) {
+        List<dynamic> data = jsonDecode(response.body);
 
-        // code to fetch the actions when refersh
-        var actions_temp = await fetchEcoActions();
-        print("contents of the actions list : \n" + actions_temp.toString());
+        List<Map<String, dynamic>> rewardsList = [];
+
+        for (int i = 0; i < data.length; i++) {
+          var reward = data[i];
+          rewardsList.add({
+            "name": reward['rewardName'] ?? 'Unknown Reward',
+            "points": "${reward['cost']} pts",
+            "imageUrl": "assets/newsfeed_img_1.png", // Replace with backend reward image if available
+            "grad_col": i % 2 == 0 ? Colors.white : Colors.black,
+            "txt_col": i % 2 == 0 ? Colors.black : Colors.white,
+          });
+        }
+
+        return rewardsList;
+      } else {
+        print("Failed to load rewards: ${response.statusCode}");
+        return [];
       }
+    } catch (e) {
+      print("Error fetching rewards: $e");
+      return [];
+    }
+  }
+
+  // fetch todays achievmesnt from node js
+  Future<List<Map<String, dynamic>>> fetchTodaysAchievements() async {
+    final url = Uri.parse('http://10.0.2.2:3000/todaysAchievements'); // Adjust IP for real device
+
+    try {
+      final response = await http.get(url);
+
+      if (response.statusCode == 200) {
+        final List<dynamic> data = jsonDecode(response.body);
+
+        List<Map<String, dynamic>> achievementsFeedData = [];
+
+        for (var entry in data) {
+          final user = entry['username'] ?? 'Unknown';
+          final action = entry['actionName'] ?? 'Did something great';
+
+          achievementsFeedData.add({
+            "title": action.replaceAll(' ', '\n'), // Format title
+            "image": "assets/newsfeed_img_1.png",  // Placeholder image path
+            "user_id": user,
+            "post_title": action,
+            "post_content":
+            "Today $user did a great job at $action and staying active.",
+          });
+        }
+
+        return achievementsFeedData;
+      } else {
+        print("Failed to fetch achievements. Status: ${response.statusCode}");
+        return [];
+      }
+    } catch (e) {
+      print("Error fetching achievements: $e");
+      return [];
+    }
+  }
+
+  void get_user_rank_and_top_ranks() async {
+    print("called fn to get user rank and top ranks");
+    print("user token is : " + user_token);
+    var temp_t_rank = await fetchTopRanks();
+    var rank = await fetchUserRank(user_token);
+
+    if (temp_t_rank.isNotEmpty) topRanks = temp_t_rank;
+    if (rank.isNotEmpty) user_rank = rank;
+  }
+
+  // get top ranks function from node js
+  Future<List<Map<String, String>>> fetchTopRanks() async {
+    final url = Uri.parse('http://10.0.2.2:3000/topContributors'); // Adjust IP if needed
+
+    try {
+      final response = await http.get(url);
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        final contributors = data['topContributors'] as List<dynamic>;
+
+        final positions = ['1st', '2nd', '3rd'];
+
+        List<Map<String, String>> topRanks = [];
+
+        for (int i = 0; i < contributors.length && i < 3; i++) {
+          final name = contributors[i]['name'] ?? 'Unknown';
+          topRanks.add({
+            'name': name,
+            'position': positions[i],
+          });
+        }
+
+        return topRanks;
+      } else {
+        print('Failed to load top contributors');
+        return [];
+      }
+    } catch (e) {
+      print('Error fetching top contributors: $e');
+      return [];
+    }
+  }
+
+  // function to fetch the rank of the user from node backend
+  Future<String> fetchUserRank(String token) async {
+    final url = Uri.parse('http://10.0.2.2:3000/rank'); // Use local IP if on real device
+
+    try {
+      final response = await http.get(
+        url,
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        return data['rank']?.toString() ?? 'Unknown';
+      } else {
+        print('Failed to get rank: ${response.statusCode}');
+        return '';
+      }
+    } catch (e) {
+      print('Error fetching rank: $e');
+      return '';
+    }
+  }
+
+
+  // get air quality info from node.js backend
+  void get_air_quality_node_js() async {
+    print("called air quality function !!");
+    Map<String, String> aqData = await fetchAirQualityData();
+
+    city = aqData["city"] ?? "Unknown";
+    pollutant = aqData["pollutant"] ?? "Unknown";
+    pm25 = aqData["pm25"] ?? "Unknown";
+    pm10 = aqData["pm10"] ?? "Unknown";
+    no2 = aqData["no2"] ?? "Unknown";
+    o3 = aqData["o3"] ?? "Unknown";
+    last_update = aqData["last_update"] ?? "Unknown";
+
+    print('City: $city, PM2.5: $pm25, Last update: $last_update');
+  }
+
+  // fetch the air info from node and return as a map
+  Future<Map<String, String>> fetchAirQualityData() async {
+    final url = Uri.parse('http://10.0.2.2:3000/info-aq'); // Replace with IP if testing on real device
+
+    try {
+      final response = await http.get(url);
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+
+        return {
+          "city": data["city"] ?? "Unknown",
+          "pollutant": data["pollutant"] ?? "Unknown",
+          "pm25": data["pm25"]?.toString() ?? "Unknown",
+          "pm10": data["pm10"]?.toString() ?? "Unknown",
+          "no2": data["no2"]?.toString() ?? "Unknown",
+          "o3": data["o3"]?.toString() ?? "Unknown",
+          "last_update": data["last_update"] ?? "Unknown",
+        };
+      } else {
+        print('Failed to fetch air quality data: ${response.statusCode}');
+        return {};
+      }
+    } catch (e) {
+      print('Error fetching air quality data: $e');
+      return {};
+    }
+  }
+
+
+  // get the newsfeed info and set it from the backend
+  void get_newsfeed_info_from_backend() async {
+    if (username != "Debug") {
+
+      get_event_newsfeed_node();
+      get_achievment_node();
+      get_action_node();
 
       setState(() {
-        if (events.isNotEmpty && username != "Debug") eventsFeedData = events;
-        if (actions_temp.isNotEmpty && username != "Debug") ActionItems = actions_temp;
       });
+    }
+  }
+
+  void get_achievment_node() async {
+    try {
+      // code to fetch the achievments of today
+      var achievment_temp = await fetchTodaysAchievements();
+      print("contents of the achievments list : \n" + achievment_temp.toString());
+      if (achievment_temp.isNotEmpty) achivementsFeedData.addAll(achievment_temp);
     } catch (e) {
-      print("Error caught is : $e");
+      print("Error in achievment node : $e");
+    }
+  }
+
+  void get_action_node() async {
+    try {
+      // code to fetch the actions when refersh
+      var actions_temp = await fetchEcoActions();
+      print("contents of the actions list : \n" + actions_temp.toString());
+      if (actions_temp.isNotEmpty) ActionItems = actions_temp;
+    } catch (e) {
+      print("Error in action node : $e");
+    }
+  }
+
+  void get_event_newsfeed_node() async {
+    try {
+      // code to fetch events newsfeed when refersh
+      var events = await fetchEventsFeedData();
+      print("contents of the events newsfeed : \n" + events.toString());
+      if (events.isNotEmpty) eventsFeedData = events;
+      print("After setting value of the events feed content is : "+ eventsFeedData.toString());
+    } catch (e) {
+      print("Error in event newsfeed fn node :  $e");
     }
   }
 
@@ -939,7 +1323,7 @@ class _MainPageState extends State<MainPage> {
     if (title.contains("Climathon")) return "assets/image 1.png";
     if (title.contains("bird")) return "assets/image 2.png";
     if (title.contains("tree")) return "assets/planting-tree.jpg";
-    return "assets/default.jpg"; // fallback image
+    return "assets/newsfeed_img_1.png"; // fallback image
   }
 
   // function to grab actions from node.js server
@@ -991,6 +1375,7 @@ class _MainPageState extends State<MainPage> {
         newsFeedData_local: newsFeedData,
         open_overlay_menu: showActionsOverview,
         openAcc_page: open_quick_acc,
+        pop_up_menu_air_quality: showPopupMenu_air_quality,
       ),
       ActionsPage(
         openRewards: open_rewards_page,
@@ -1059,6 +1444,7 @@ class HomePage extends StatelessWidget {
   final VoidCallback openRewards; // Callback function
   final List<Map<String, dynamic>> newsFeedData_local;
   final void Function(BuildContext) open_overlay_menu;
+  final void Function(BuildContext) pop_up_menu_air_quality;
   final VoidCallback openAcc_page;
 
   const HomePage({Key? key,
@@ -1066,6 +1452,7 @@ class HomePage extends StatelessWidget {
     required this.newsFeedData_local,
     required this.open_overlay_menu,
     required this.openAcc_page,
+    required this.pop_up_menu_air_quality
   }) : super(key: key);
 
   @override
@@ -1171,6 +1558,81 @@ class HomePage extends StatelessWidget {
           ),
 
           SizedBox(
+            height: 10,
+          ),
+
+          // air quality layout
+          GestureDetector(
+            onTap: () async {
+              print("tapped on air quality button !!");
+              pop_up_menu_air_quality(context);
+            },
+            child: Material(
+              elevation: 0,
+              color: Color.fromARGB(255, 241, 241, 241),
+              shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+              child: Padding(
+                padding: const EdgeInsets.all(5.0),
+
+                child: Container(
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(20),
+                    child: Container(
+                      child: Row(
+                        children: <Widget>[
+                          // Widgets for Actions overview
+
+                          SizedBox(
+                            height: 12,
+                          ),
+
+                          Row(
+                            children: <Widget>[
+
+                              SizedBox(
+                                width: 13,
+                              ),
+
+                              Image(
+                                image: AssetImage('assets/air_quality_icon.png'),
+                                width: 41,
+                                height: 41,
+                              ),
+
+                              SizedBox(
+                                width: 8,
+                              ),
+
+                              Text("Air quality",
+                                style: GoogleFonts.gabarito(
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+
+                            ],
+                          ),
+
+                          SizedBox(
+                            height: 5,
+                          ),
+
+
+
+                        ],
+                      ),
+                      width: 310,
+                      height: 50,
+                      color: Color.fromARGB(255, 241, 241, 241),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+
+          SizedBox(
             height: 43,
           ),
 
@@ -1214,11 +1676,8 @@ class HomePage extends StatelessWidget {
           ),
 
           SizedBox(
-            width: 21,
+            width: 20,
           ),
-
-
-
 
 
         ],
@@ -1805,6 +2264,8 @@ class For_U_Page extends StatelessWidget {
                   SizedBox(
                     height: 40,
                   ),
+
+
 
                 ],
               ),

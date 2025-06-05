@@ -26,57 +26,16 @@ class _LoginPage_viewState extends State<LoginPage_view> {
   // some vars
   String entered_username = '';
   String entered_pass = '';
+  String token = '';
 
-  // check internet connection fn
-  Future<bool> hasInternetAccess() async {
-    try {
-      final result = await InternetAddress.lookup('google.com');
-      return result.isNotEmpty && result[0].rawAddress.isNotEmpty;
-    } catch (e) {
-      return false;
-    }
-  }
 
-  // check login info
-  Future<bool> loginUser(String username, String password) async {
-    final url = Uri.parse('http://10.0.2.2:3000/login'); // Use IP if on real device
-
-    try {
-      final response = await http.post(
-        url,
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({
-          'user': username,
-          'password': password,
-        }),
-      );
-
-      if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
-        if (data['status'] == true && data['token'] != null) {
-          print('Login successful! Token: ${data['token']}');
-          // Save the token if needed
-          return true;
-        } else {
-          print('Login failed: Invalid credentials');
-          return false;
-        }
-      } else {
-        print('Login failed: ${response.statusCode}');
-        return false;
-      }
-    } catch (e) {
-      print('Login error: $e');
-      return false;
-    }
-  }
 
   // save user data localy
   Future<void> _saveUserDataLocaly() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString('username', entered_username);
     await prefs.setString('passw', entered_pass);
-
+    await prefs.setString('token', token);
   }
 
   // login fn
@@ -85,6 +44,7 @@ class _LoginPage_viewState extends State<LoginPage_view> {
     if (entered_username.isNotEmpty && entered_pass.isNotEmpty && entered_username != "Debug") {
 
       bool cred_true = await loginUser(entered_username, entered_pass);
+      token = await loginUser_return_token(entered_username, entered_pass);
 
       if (cred_true) {
         print('with creadentials_var Credentials are correct welcome !!!');
