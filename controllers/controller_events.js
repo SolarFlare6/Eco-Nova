@@ -1,9 +1,9 @@
 const eventService=require('../services/service_events');
 //Post event
 const postEvent=async(req,res)=>{
-const{title,description,location,creator,eventLink,date}=req.body;
+const{title,url,description,location,creator,eventLink,date}=req.body;
 try{
-    const newEvent=await eventService.createEvent({title,description,location,creator,eventLink,date});
+    const newEvent=await eventService.createEvent({title,url,description,location,creator,eventLink,date});
     res.status(201).json({
     message: 'Event created',
     event: newEvent});
