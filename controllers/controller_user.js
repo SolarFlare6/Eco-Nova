@@ -31,7 +31,7 @@ exports.loginUser=async(req,res)=>{
 //Get user rank
 exports.getUserRank=async(req,res)=>{
     try{
-       const userRank=await userService.checkUserRank(req.user.id);
+       const userRank=await userService.checkUserRank(req.user.ID);
        res.status(200).json(userRank); 
     }
     catch(error) {
