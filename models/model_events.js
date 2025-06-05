@@ -3,7 +3,7 @@ const{Schema}=mongoose;
 //Defining events schema with properties
 const eventSchema=new Schema({
     title:String,
-    url:String
+    url:String,
     description:String,
     location:String,
     creator:String,
