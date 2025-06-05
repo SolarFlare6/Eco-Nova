@@ -29,12 +29,12 @@ exports.loginUser=async(req,res)=>{
     throw error;}
 }
 //Get user rank
-exports.getUserRank=async(req,res)=>{
-    try{
-       const userRank=await userService.checkUserRank(req.user.ID);
-       res.status(200).json(userRank); 
-    }
-    catch(error) {
-    res.status(400).json({message:'Bad request or invalid id',error});
-    throw error;}
+exports.getUserRank =async(req,res) =>{
+  try{
+    if(!req.user || !req.user.ID){
+      return res.status(401).json({ message: 'Unauthorized: User not found' });}
+    const userRank = await userService.checkUserRank(req.user.ID);
+    res.status(200).json({ rank: userRank });
+  }catch (error) {
+    res.status(400).json({ message: 'Bad request or invalid id', error });}
 }
