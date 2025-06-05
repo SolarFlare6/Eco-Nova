@@ -17,7 +17,7 @@ class RewardsService{
     }catch(error){
      throw error;}
     }
-//Add and save reward
+   //Add and save reward
    static async addReward(rewardData){
     try{
       const reward=new Rewards(rewardData);
@@ -25,8 +25,8 @@ class RewardsService{
     }catch(error) { 
     throw error;}
    }
-//Fetch rewards
-static async getRewards(urls = []){
+//Get rewards based on url,if not returns all available
+   static async getRewards(urls = []){
     try{
     let backendRewards;
     if (urls.length > 0) {
@@ -37,5 +37,5 @@ static async getRewards(urls = []){
   }catch(error) {
     console.log('Error fetching events info');
     throw error;}} 
-}
+   }
 module.exports=RewardsService;
